@@ -1,3 +1,5 @@
 module bittorrent-client
 
-go 1.21.1
+go 1.22.0
+
+require github.com/jackpal/bencode-go v1.0.2

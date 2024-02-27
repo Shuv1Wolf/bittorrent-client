@@ -17,9 +17,8 @@ func main() {
 	}
 
 	logger := slog.New(slog.Default().Handler())
-
 	logger.Info("start app")
 
-	fmt.Println(bencode.Read(logger, filePath))
-	bencode.Read(logger, filePath)
+	fmt.Println(bencode.Open(logger, filePath))
+
 }
