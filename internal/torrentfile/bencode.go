@@ -1,4 +1,4 @@
-package bencode
+package torrentfile
 
 import (
 	"bittorrent-client/internal/lib/logger/sl"
@@ -53,6 +53,29 @@ func Open(log *slog.Logger, filePath string) (TorrentFile, error) {
 	return bto.toTorrentFile()
 }
 
+func (bto *bencodeTorrent) toTorrentFile() (TorrentFile, error) {
+	const op = "internal.bencode.toTorrentFile"
+
+	infoHash, err := bto.Info.hash()
+	if err != nil {
+		return TorrentFile{}, fmt.Errorf("%s: %w", op, err)
+	}
+	pieceHashes, err := bto.Info.splitPieceHashes()
+	if err != nil {
+		return TorrentFile{}, fmt.Errorf("%s: %w", op, err)
+	}
+	t := TorrentFile{
+		Announce:    bto.Announce,
+		InfoHash:    infoHash,
+		PieceHashes: pieceHashes,
+		PieceLength: bto.Info.PieceLength,
+		Length:      bto.Info.Length,
+		Name:        bto.Info.Name,
+	}
+
+	return t, nil
+}
+
 func (i *bencodeInfo) hash() ([20]byte, error) {
 	const op = "internal.bencode.hash"
 
@@ -80,26 +103,4 @@ func (i *bencodeInfo) splitPieceHashes() ([][20]byte, error) {
 		copy(hashes[i][:], buf[i*hashLen:(i+1)*hashLen])
 	}
 	return hashes, nil
-}
-
-func (bto *bencodeTorrent) toTorrentFile() (TorrentFile, error) {
-	const op = "internal.bencode.toTorrentFile"
-
-	infoHash, err := bto.Info.hash()
-	if err != nil {
-		return TorrentFile{}, fmt.Errorf("%s: %w", op, err)
-	}
-	pieceHashes, err := bto.Info.splitPieceHashes()
-	if err != nil {
-		return TorrentFile{}, fmt.Errorf("%s: %w", op, err)
-	}
-	t := TorrentFile{
-		Announce:    bto.Announce,
-		InfoHash:    infoHash,
-		PieceHashes: pieceHashes,
-		PieceLength: bto.Info.PieceLength,
-		Length:      bto.Info.Length,
-		Name:        bto.Info.Name,
-	}
-	return t, nil
 }
